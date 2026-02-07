@@ -1,5 +1,9 @@
 # PROYECTO MI BOARD, PARA GESTIONAR TAREAS
 
+link del repositorio: https://github.com/Chrisreboc/m4-apb-javascript.git
+
+link del deploy: https://chrisreboc.github.io/m4-apb-javascript/
+
 ## 1. INTRODUCCIÓN
 Este documento busca describir cómo funciona principalmente la lógica de archivo index.js en el proyecto, que métodos trabaja y cuales son los objectivos de cada parte del codigo, con el fin de tener una idea más clara de la lógica detras de la aplicación. Cabe destacar que se centrará más que nada en la lógica y métodos utilizados.
 
