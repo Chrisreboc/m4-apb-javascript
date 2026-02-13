@@ -81,6 +81,9 @@
                             <input type="checkbox" class="task-item__check" />
                             <span class="task-item__text">Tarea 1</span>
                         </label>
+                        <button class="task-list__rename" aria-label="Renombrar tarea">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
                         <button class="task-item__delete" aria-label="Eliminar tarea">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
@@ -152,6 +155,23 @@
             <div class="confirm-delete-modal-task__actions">
                 <button class="confirm-delete-modal-task__confirm">Aceptar</button>
                 <button class="confirm-delete-modal-task__cancel">Cancelar</button>
+            </div>
+        </div>
+    </dialog>
+
+        <!-- MODAL RENOMBRAR TAREA -->
+
+    <dialog class="rename-task">
+        <div class="rename-task__content">
+            <p>Escribe el nuevo nombre de tu tarea.</p>
+
+            <div class="rename-task__input">
+                <input type="text" name="tasktorename" id="task-to-rename">
+            </div>
+
+            <div class="rename-task__actions">
+                <button class="rename-task__confirm">Aceptar</button>
+                <button class="rename-task__cancel">Cancelar</button>
             </div>
         </div>
     </dialog>

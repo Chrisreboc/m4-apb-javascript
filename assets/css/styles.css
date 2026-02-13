@@ -83,6 +83,23 @@ h1 {
     background-color: var(--postit-lightyellow);
 }
 
+.task-list[data-color="lightpink"] .task-list__color-toggle {
+    background-color: var(--postit-lightpink);
+}
+
+.task-list[data-color="orange"] .task-list__color-toggle {
+    background-color: var(--postit-orange);
+}
+
+.task-list[data-color="lightblue"] .task-list__color-toggle {
+    background-color: var(--postit-lightblue);
+}
+
+.task-list[data-color="green"] .task-list__color-toggle {
+    background-color: var(--postit-green);
+}
+
+
 /* ===== LAYOUT DE LA PÁGINA ===== */
 main {
     padding: 1.5rem;
@@ -143,10 +160,43 @@ button {
 
 button:hover {
     transform: translateY(-1px);
+    color: rgb(212, 212, 212);
+    background-color: rgb(26, 26, 26);
 }
 
 button:active {
     transform: scale(0.97);
+    color: rgba(0, 0, 0, 0.2);
+}
+
+.task-list__rename{
+    color: rgba(0, 0, 0, 0.5);
+    padding: 0.4rem 0.4rem 0.4rem 0.8rem;
+}
+
+.task-list__rename:hover{
+    color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.task-list__rename:active{
+    color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.task-item__delete{
+    padding: 0.4rem 0.4rem 0.8rem 0.4rem;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.task-item__delete:hover{
+    color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.task-item__delete:active{
+    color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0);
 }
 
 .task-list__color-toggle {
@@ -158,10 +208,11 @@ button:active {
     justify-content: center;
     align-content: center;
     margin: 0 1rem;
+    color: rgba(0, 0, 0, 0.5);
 }
 
-.task-list[data-color="blue"] .task-list__color-toggle {
-    background-color: var(--postit-blue);
+.task-list__color-toggle:hover{
+    color:rgba(0, 0, 0, 0.7);
 }
 
 /* CAJA EMERGENTE */
@@ -197,6 +248,10 @@ button:active {
 .board__delete-list {
     background-color: rgb(253, 73, 73);
     color: white;
+}
+
+.board__delete-list:hover {
+    background-color: rgb(173, 46, 46);
 }
 
 .board__delete-list.is-active {
@@ -254,6 +309,10 @@ button:active {
     margin: 0 5px;
 }
 
+.confirm-delete-modal__confirm:hover {
+    background-color: rgb(173, 46, 46);
+}
+
 .confirm-delete-modal__cancel {
     background-color: rgb(83, 83, 83);
     color: white;
@@ -293,6 +352,10 @@ button:active {
     margin: 0 5px;
 }
 
+.add-task-modal__confirm:hover {
+    background-color: rgb(50, 119, 33);
+}
+
 .add-task-modal__cancel {
     background-color: rgb(83, 83, 83);
     color: white;
@@ -327,9 +390,13 @@ button:active {
 }
 
 .confirm-delete-modal-task__confirm {
-    background-color: rgb(60, 145, 39);
+    background-color: rgb(253, 73, 73);
     color: white;
     margin: 0 5px;
+}
+
+.confirm-delete-modal-task__confirm:hover{
+    background-color: rgb(173, 46, 46);
 }
 
 .confirm-delete-modal-task__cancel {
@@ -377,6 +444,52 @@ button:active {
     background: rgba(0, 0, 0, 0.4);
 }
 
+/* MODAL RENOMBRAR TAREAS */
+
+.rename-task {
+    border: none;
+    border-radius: 12px;
+    padding: 0;
+    margin: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+.rename-task__content {
+    padding: 1.5rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rename-task__input{
+    align-self: center;
+}
+
+.rename-task__actions {
+    display: flex;
+    justify-content: center;
+}
+
+.rename-task__confirm {
+    background-color: rgb(60, 145, 39);
+    color: white;
+    margin: 0 5px;
+}
+
+.rename-task__confirm:hover{
+    background-color: rgb(50, 119, 33);
+}
+
+.rename-task__cancel {
+    background-color: rgb(83, 83, 83);
+    color: white;
+    margin: 0 5px;
+}
+
+.rename-task::backdrop {
+    background: rgba(0, 0, 0, 0.4);
+}
 
 
 /* BOTONES SELECCIÓN DE COLORES */

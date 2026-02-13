@@ -27,6 +27,11 @@ const cancelAddTaskBtn = document.querySelector('.add-task-modal__cancel');
 const completionModal = document.querySelector('.completion-modal');
 const completionCloseBtn = document.querySelector('.completion-modal__close');
 
+const renameTaskModal = document.querySelector('.rename-task');
+const renameTaskInput = renameTaskModal.querySelector('#task-to-rename');
+const confirmRenameTaskBtn = document.querySelector('.rename-task__confirm');
+const cancelRenameTaskBtn = document.querySelector('.rename-task__cancel');
+
 // ============================================================================
 // VARIABLES DE ESTADO GLOBAL
 // ============================================================================
@@ -38,6 +43,8 @@ let selectedListId = null;
 let currentTaskList = null;
 let taskToDelete = null;
 let listOfTaskToDelete = null;
+let taskToRename = null;
+let listOfTaskToRename = null;
 
 const deleteBtnDefaultHTML = '<i class="bi bi-trash3-fill"></i> Borrar lista';
 const deleteBtnCancelHTML = 'X Cancelar acción';
@@ -176,9 +183,12 @@ function addTaskToList(taskList, text) {
 
     li.innerHTML = `
         <label>
-            <input type="checkbox" class="task-item__check">
-            <span class="task-item__text"></span>
+            <input type="checkbox" class="task-item__check" />
+            <span class="task-item__text">Tarea 1</span>
         </label>
+        <button class="task-list__rename" aria-label="Renombrar tarea">
+            <i class="bi bi-pencil-square"></i>
+        </button>
         <button class="task-item__delete" aria-label="Eliminar tarea">
             <i class="bi bi-trash3-fill"></i>
         </button>
@@ -514,4 +524,67 @@ document.addEventListener('change', event => {
 
 completionCloseBtn.addEventListener('click', () => {
     completionModal.close();
+});
+
+// ============================================================================
+// EVENTOS - RENOMBRAR TAREAS
+// ============================================================================
+
+// ABRIR MODAL AL PRESIONAR RENOMBRAR TAREA
+document.addEventListener('click', event => {
+    const renameTaskBtn = event.target.closest('.task-list__rename');
+    if (!renameTaskBtn) return;
+
+    const taskItem = renameTaskBtn.closest('.task-item');
+    const taskList = renameTaskBtn.closest('.task-list');
+
+    taskToRename = taskItem;
+    listOfTaskToRename = taskList;
+
+    // Obtener el texto actual de la tarea y pre-llenarlo en el input
+    const currentText = taskItem.querySelector('.task-item__text').textContent;
+    renameTaskInput.value = currentText;
+    
+    renameTaskModal.showModal();
+    
+    // Seleccionar todo el texto para facilitar el reemplazo
+    renameTaskInput.select();
+});
+
+// CONFIRMAR RENOMBRAR TAREA
+confirmRenameTaskBtn.addEventListener('click', () => {
+    if (!taskToRename || !listOfTaskToRename) return;
+
+    const newTaskText = renameTaskInput.value.trim();
+    
+    // Validar que no esté vacío
+    if (newTaskText === '') return;
+
+    const listId = Number(listOfTaskToRename.dataset.listId);
+    const taskId = Number(taskToRename.dataset.taskId);
+
+    // 1️⃣ Actualizar en el array
+    const list = lists.find(l => l.id === listId);
+    if (list) {
+        const task = list.tasks.find(t => t.id === taskId);
+        if (task) {
+            task.text = newTaskText;
+        }
+    }
+
+    // 2️⃣ Actualizar en el DOM
+    const taskTextElement = taskToRename.querySelector('.task-item__text');
+    taskTextElement.textContent = newTaskText;
+
+    // 3️⃣ Cerrar modal y limpiar estado
+    renameTaskModal.close();
+    taskToRename = null;
+    listOfTaskToRename = null;
+});
+
+// CANCELAR RENOMBRAR TAREA
+cancelRenameTaskBtn.addEventListener('click', () => {
+    taskToRename = null;
+    listOfTaskToRename = null;
+    renameTaskModal.close();
 });
