@@ -50,46 +50,132 @@ const deleteBtnDefaultHTML = '<i class="bi bi-trash3-fill"></i> Borrar lista';
 const deleteBtnCancelHTML = 'X Cancelar acción';
 
 // ============================================================================
+// INDEXED DB - CONFIGURACIÓN
+// ============================================================================
+
+const DB_NAME = 'TaskBoardDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'listsStore';
+
+let db;
+
+// Abrir base de datos
+async function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = event => {
+            const db = event.target.result;
+
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
+        };
+
+        request.onsuccess = event => {
+            db = event.target.result;
+            resolve(db);
+        };
+
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Guardar datos
+async function saveToDB() {
+    if (!db) return;
+
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+
+    store.put(lists, 'allLists');
+
+    return new Promise((resolve, reject) => {
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+    });
+}
+
+// Cargar datos
+async function loadFromDB() {
+    if (!db) return [];
+
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+
+    const request = store.get('allLists');
+
+    return new Promise((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// ============================================================================
 // INICIALIZACIÓN - DETECCIÓN Y SINCRONIZACIÓN DE LISTA EXISTENTE
 // ============================================================================
 
 /*DETECCIÓN DE LA LISTA EXISTENTE 
 (no puedo creer que estuviese toda una tarde trantando de encontrar el error, no salía por consola y ni la IA lo identificaba,
 se creaban listas pero solo en elementos nuevos, no en el existente, luego realicé eso y pude solucionar el problema.) */
-if (initialListElement) {
-    lists.push({
-        id: 1,
-        title: initialListElement.querySelector('.task-list__title').value,
-        color: 'lightyellow',
-        tasks: []
-    });
-}
+document.addEventListener('DOMContentLoaded', async () => {
 
-// SINCRONIZAR TAREAS EXISTENTES EN LA LISTA POR DEFAULT
-if (initialListElement) {
-    const defaultList = lists.find(l => l.id === 1);
-    const taskItems = initialListElement.querySelectorAll('.task-item');
+    db = await openDB();
+    const storedLists = await loadFromDB();
 
-    taskItems.forEach(taskItem => {
-        const text = taskItem.querySelector('.task-item__text')?.textContent.trim();
-        const checkbox = taskItem.querySelector('.task-item__check');
+    if (storedLists.length > 0) {
 
-        const task = {
-            id: Date.now() + Math.random(), // id único
-            text: text,
-            completed: checkbox.checked
-        };
+        // RESTAURAR DESDE DB
 
-        // Guardar id en el DOM
-        taskItem.dataset.taskId = task.id;
+        lists.length = 0;
 
-        // Agregar al array
-        defaultList.tasks.push(task);
-    });
+        document.querySelectorAll('.task-list').forEach(list => list.remove());
 
-    // Actualizar progreso inicial
-    updateProgress(initialListElement);
-}
+        storedLists.forEach(list => {
+            lists.push(list);
+            const section = createTaskListFromData(list);
+            board.appendChild(section);
+        });
+
+        listCounter = Math.max(...lists.map(l => l.id));
+
+    } else {
+
+        // CREAR ESTADO INICIAL DESDE HTML
+
+        if (initialListElement) {
+            const defaultList = {
+                id: 1,
+                title: initialListElement.querySelector('.task-list__title').value,
+                color: 'lightyellow',
+                tasks: []
+            };
+
+            lists.push(defaultList);
+
+            const taskItems = initialListElement.querySelectorAll('.task-item');
+
+            taskItems.forEach(taskItem => {
+                const text = taskItem.querySelector('.task-item__text')?.textContent.trim();
+                const checkbox = taskItem.querySelector('.task-item__check');
+
+                const task = {
+                    id: Date.now() + Math.random(),
+                    text: text,
+                    completed: checkbox.checked
+                };
+
+                taskItem.dataset.taskId = task.id;
+                defaultList.tasks.push(task);
+            });
+
+            updateProgress(initialListElement);
+
+            saveToDB();
+        }
+    }
+});
+
 
 // ============================================================================
 // FUNCIONES - GESTIÓN DE LISTAS
@@ -108,6 +194,8 @@ function createTaskList() {
     };
 
     lists.push(list);
+
+    saveToDB(); // para guardar cambios en IdexedDB al crear tarea.
 
     //MODIFICAR DOM
     const section = document.createElement('section');
@@ -174,6 +262,7 @@ function addTaskToList(taskList, text) {
     };
 
     list.tasks.push(task);
+    saveToDB();
 
     const taskListItems = taskList.querySelector('.task-list__items');
 
@@ -247,6 +336,14 @@ function applyColor(colorButton) {
 
     taskList.dataset.color = selectedColor;
 
+    const listId = Number(taskList.dataset.listId);
+    const list = lists.find(l => l.id === listId);
+
+    if (list) {
+        list.color = selectedColor;
+        saveToDB();
+    }
+
     const colorMenu = taskList.querySelector('.task-list__color-menu');
     colorMenu.setAttribute('hidden', '');
 }
@@ -311,6 +408,24 @@ function animatePercentage(element, from, to, duration = 400) {
 function showCompletionModal() {
     completionModal.showModal();
 }
+
+// ============================================================================
+// EVENTOS - CAMBIAR NOMBRE LISTA
+// ============================================================================
+document.addEventListener('input', event => {
+    const titleInput = event.target.closest('.task-list__title');
+    if (!titleInput) return;
+
+    const taskList = titleInput.closest('.task-list');
+    const listId = Number(taskList.dataset.listId);
+
+    const list = lists.find(l => l.id === listId);
+    if (!list) return;
+
+    list.title = titleInput.value;
+    saveToDB();
+});
+
 
 // ============================================================================
 // EVENTOS - CREAR Y ELIMINAR LISTAS
@@ -386,6 +501,7 @@ document.querySelector('.confirm-delete-modal__confirm')
         const index = lists.findIndex(l => l.id === Number(selectedListId));
         if (index !== -1) {
             lists.splice(index, 1);
+            saveToDB();
         }
 
         confirmDeleteModal.close();
@@ -469,11 +585,12 @@ confirmDeleteTaskBtn.addEventListener('click', () => {
     const listId = Number(listOfTaskToDelete.dataset.listId);
     const taskId = Number(taskToDelete.dataset.taskId);
 
-    
+
     const list = lists.find(l => l.id === listId);
     if (!list) return;
     // 1 Borrar del array
     list.tasks = list.tasks.filter(task => task.id !== taskId);
+    saveToDB();
     // 2️ Borrar del DOM  
     taskToDelete.remove();
     // 3️ Actualizar progreso
@@ -482,7 +599,7 @@ confirmDeleteTaskBtn.addEventListener('click', () => {
     confirmDeleteTaskModal.close();
     taskToDelete = null;
     listOfTaskToDelete = null;
-    
+
 });
 
 //CANCELAR BORRAR
@@ -514,6 +631,7 @@ document.addEventListener('change', event => {
     if (!task) return;
 
     task.completed = checkbox.checked;
+    saveToDB();
 
     updateProgress(taskList);
 });
@@ -544,9 +662,9 @@ document.addEventListener('click', event => {
     // Obtener el texto actual de la tarea y pre-llenarlo en el input
     const currentText = taskItem.querySelector('.task-item__text').textContent;
     renameTaskInput.value = currentText;
-    
+
     renameTaskModal.showModal();
-    
+
     // Seleccionar todo el texto para facilitar el reemplazo
     renameTaskInput.select();
 });
@@ -556,7 +674,7 @@ confirmRenameTaskBtn.addEventListener('click', () => {
     if (!taskToRename || !listOfTaskToRename) return;
 
     const newTaskText = renameTaskInput.value.trim();
-    
+
     // Validar que no esté vacío
     if (newTaskText === '') return;
 
@@ -569,6 +687,7 @@ confirmRenameTaskBtn.addEventListener('click', () => {
         const task = list.tasks.find(t => t.id === taskId);
         if (task) {
             task.text = newTaskText;
+            saveToDB();
         }
     }
 
@@ -588,3 +707,99 @@ cancelRenameTaskBtn.addEventListener('click', () => {
     listOfTaskToRename = null;
     renameTaskModal.close();
 });
+
+// ============================================================================
+// INICIALIZACIÓN DESDE INDEXEDDB
+// ============================================================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+    db = await openDB();
+
+    const storedLists = await loadFromDB();
+
+    if (storedLists.length > 0) {
+        // Limpiar estado actual
+        lists.length = 0;
+
+        // Limpiar DOM
+        document.querySelectorAll('.task-list').forEach(list => list.remove());
+
+        // Restaurar datos
+        storedLists.forEach(list => {
+            lists.push(list);
+
+            const section = createTaskListFromData(list);
+            board.appendChild(section);
+        });
+
+        // Ajustar contador
+        listCounter = Math.max(...lists.map(l => l.id));
+    }
+});
+
+function createTaskListFromData(listData) {
+
+    const section = document.createElement('section');
+    section.classList.add('task-list');
+    section.dataset.listId = listData.id;
+    section.dataset.color = listData.color;
+
+    section.innerHTML = `
+        <header class="task-list__header">
+            <input 
+                type="text" 
+                class="task-list__title" 
+                value="${listData.title}"
+            />
+            <button class="task-list__color-toggle">
+                <i class="bi bi-palette-fill"></i>
+            </button>
+        </header>
+
+        <div class="task-list__progress">
+            <progress value="0" max="100"></progress>
+            <span class="task-list__progress-text">0%</span>
+        </div>
+
+        <div class="task-list__color-menu" hidden>
+            <button data-color="lightpink">Rosa</button>
+            <button data-color="orange">Anaranjado</button>
+            <button data-color="lightyellow">Amarillo</button>
+            <button data-color="green">Verde</button>
+            <button data-color="lightblue">Celeste</button>
+        </div>
+
+        <ul class="task-list__items"></ul>
+
+        <div class="task-list__actions">
+            <button class="task-list__add-task">+ Agregar tarea</button>
+        </div>
+    `;
+
+    const ul = section.querySelector('.task-list__items');
+
+    listData.tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.classList.add('task-item');
+        li.dataset.taskId = task.id;
+
+        li.innerHTML = `
+            <label>
+                <input type="checkbox" class="task-item__check" ${task.completed ? 'checked' : ''} />
+                <span class="task-item__text">${task.text}</span>
+            </label>
+            <button class="task-list__rename">
+                <i class="bi bi-pencil-square"></i>
+            </button>
+            <button class="task-item__delete">
+                <i class="bi bi-trash3-fill"></i>
+            </button>
+        `;
+
+        ul.appendChild(li);
+    });
+
+    updateProgress(section);
+
+    return section;
+}
