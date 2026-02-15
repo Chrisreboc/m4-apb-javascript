@@ -410,6 +410,25 @@ function showCompletionModal() {
 }
 
 // ============================================================================
+// FUNCIONES - FRASE MOTIVACIONAL (lamentablemente está en inglés, pero la función cumple su propósito.)
+// ============================================================================
+async function fetchMotivationalQuote() {
+    const quoteElement = document.querySelector('.header__quote');
+
+    try {
+        const response = await fetch('https://api.adviceslip.com/advice');
+        const data = await response.json();
+
+        const quote = data.slip.advice;
+
+        quoteElement.textContent = quote;
+
+    } catch (error) {
+        console.error('Error obteniendo frase:', error);
+    }
+}
+
+// ============================================================================
 // EVENTOS - CAMBIAR NOMBRE LISTA
 // ============================================================================
 document.addEventListener('input', event => {
@@ -735,6 +754,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Ajustar contador
         listCounter = Math.max(...lists.map(l => l.id));
     }
+
+    //Recargar frase.
+    fetchMotivationalQuote();
 });
 
 function createTaskListFromData(listData) {
