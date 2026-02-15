@@ -700,7 +700,7 @@ confirmRenameTaskBtn.addEventListener('click', () => {
     const listId = Number(listOfTaskToRename.dataset.listId);
     const taskId = Number(taskToRename.dataset.taskId);
 
-    // 1️⃣ Actualizar en el array
+    // Actualizar en el array
     const list = lists.find(l => l.id === listId);
     if (list) {
         const task = list.tasks.find(t => t.id === taskId);
@@ -710,11 +710,11 @@ confirmRenameTaskBtn.addEventListener('click', () => {
         }
     }
 
-    // 2️⃣ Actualizar en el DOM
+    // Actualizar en el DOM
     const taskTextElement = taskToRename.querySelector('.task-item__text');
     taskTextElement.textContent = newTaskText;
 
-    // 3️⃣ Cerrar modal y limpiar estado
+    // Cerrar modal y limpiar estado
     renameTaskModal.close();
     taskToRename = null;
     listOfTaskToRename = null;
