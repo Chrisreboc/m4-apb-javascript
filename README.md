@@ -89,7 +89,7 @@ Este sistema permite personalizar el color de una lista.
 
 - animatePercentaje(element, from, to, duration): primero captura el inicio con performance.now() Calcula el progreso de la animación mediante Math.min() para así actualizar el valor (redondeado) mediante Math.round(), y continua con la animación hasta completar la función.
 
-## 10. MENSAJE MOTIACIONAL
+## 10. MENSAJE MOTIVACIONAL
 
 - fetchMotivationalQuote: es una función asíncrona que intercambia la frase default de .header__quote, por la frase proveniente de una API de terceros. Se útiliza Try... Catch, para manejar la petición en caso de que sea positiva o negativa. Utilizando Fetch, se hace la petición a la API, y se espera por la respuesta en formato.json. En caso de no funcionar, el mensaje queda como default y Catch maneja el error.
 
