@@ -89,33 +89,50 @@ Este sistema permite personalizar el color de una lista.
 
 - animatePercentaje(element, from, to, duration): primero captura el inicio con performance.now() Calcula el progreso de la animación mediante Math.min() para así actualizar el valor (redondeado) mediante Math.round(), y continua con la animación hasta completar la función.
 
-## 10. EVENTOS
+## 10. MENSAJE MOTIACIONAL
 
-### 10.1 Evento crear lista
+- fetchMotivationalQuote: es una función asíncrona que intercambia la frase default de .header__quote, por la frase proveniente de una API de terceros. Se útiliza Try... Catch, para manejar la petición en caso de que sea positiva o negativa. Utilizando Fetch, se hace la petición a la API, y se espera por la respuesta en formato.json. En caso de no funcionar, el mensaje queda como default y Catch maneja el error.
+
+## 11. EVENTOS
+
+### 11.1 Evento crear lista
 Evento encargado de crear listas; cuando se pincha el botón "deleteListBtn" cambia el estado de "deleteMode" a true, pues por default está en false. Cambia el html del botón al nuevo mensaje de cancelar accion. Si se desactiva, regresa a su estado original delete mode false.
 
-### 10.2 Modo de eliminación. (deleteMode)
+### 11.2 Modo de eliminación. (deleteMode)
 Cuando deleteMode está activo (true) y se pincha una lista, primero verifica que no sea en alguno de los botones internos, guarda el data-list-id en selectedListId y detona el modal de confirmación.
 
-### 10.3 Confirmar eliminación.
+### 11.3 Confirmar eliminación.
 Al confirmar eliminación se elimina el elemento del DOM mediante "remove()" y luego se elimina el objeto del array "lists" mediante "splice()" (mejor y más seguro que delete, ya que no deja espacios de array undefined.) finalmente cierra el modal y desactiva deleteMode.
 
-### 10.4 Abrir modal para agregar tareas
+### 11.4 Abrir modal para agregar tareas
 Cuando se hace clic en el botón "agregar tarea", guarda la referencia a lista en el currentTaskLit(), limpia el input del modal y detona el modal addTaskModal, 
 
-### 10.5 Confirmar agregar tarea
+### 11.5 Confirmar agregar tarea
 Si se confirma el agregar una tarea a lista, se extrae y limpia el texto del input, si no está vacío llama a addTaskToList() con la lista y el texto, finalmente el modal de cierra.
 
-### 10.6 Eliminar tarea
+### 11.6 Eliminar tarea
 Al hacer clic en el botón de eliminar tarea (trashcan), guarda las referencias a la tarea y a la lista en TaskToDelete y listOfTaskToDelte, para luego detonar el modal.
 
-### 10.7 Confirmar borrar tarea
+### 11.7 Confirmar borrar tarea
 Al confirmar el borrar tarea, se extrae los id de la lista y la tarea mediante find(). Filtra el array de tareas para eliminarla del array mediante filter(), elimina el elemento del DOM mediante remove(), actualiza la lista de progresos y cierra el modal.
 
-### 10.9 Marcar tareas como completadas
+### 11.9 Marcar tareas como completadas
 Cuando se marca una casilla (checked) localiza la lista y tarea (mediante find()) actualiza la propiedad completed del objeto y luego se llama a updateProgress() para recalcular el porcentaje.
 
-## 11 DATOS
+### 11.10 Cambiar nombre del elemento lista.
+Se agrego una función flecha que se encarga de registrar cada vez que se ingresa un nuevo nombre a una lista, con el fin de almacenarlo más tarde en indexedDB. 
+
+### 11.11 Cambiar nombre del elemento tarea.
+Este evento de clic está atento a si se apreta el botón de cambiar nombre y hace deploy del modal, para cambiar nombre, él la función captura la frase que se escriba en el input.
+
+### 11.12 Cambiar nombre del elemento tarea.
+Cuando el nombre de una nueva tare ase escribe en el modal, se asegura de que el input no esté vacío, al presionar el botón confirmar, mediante find() se busca el objeto dentro del array lists, y en el array de tasks, lo reemplaza por el nuevo mensaje. luego este se almacena en indexedDB.
+
+### 11.13 DOM Content Loaded
+
+DOMContentLoaded, es un evento async que funciona mediante una función flecha, esta se comunica con la API propia del navegador, IndexedDB, epera a que se abra y de respuestas mediante await, luego se asegura de borrar el elemento default en el DOM mediante ForEach (con el revisa que los valores del array default queden vacíos) y a sí posteriormente mediante un nuevo forEach revisa cada elemento de lista almacenada en IndexedDB y se asegura de rescatarlos y añadirlos al DOM mediante appendChild. hace ajuste del contador y recarga la frase motivacional. cabe destacar que luego de cada acción en el DOM se guardan los cambios en IndexedDB mediante SaveDB().
+
+## 12 DATOS
 El array list posee:
 
 id, title, color y tasks (array)
