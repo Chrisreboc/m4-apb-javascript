@@ -636,7 +636,7 @@ button:active {
     }
 
     .header__quote {
-        bottom: 22px;
+        bottom: 10px;
     }
 
     @keyframes splashZoom {
